@@ -43,10 +43,10 @@ if (global.admin.existsSync('projects')) {
   global.projectsConfig = global.admin.readSync('projects');
 }
 
-const serieIdFind = /stringToFindInSerieId/; // regex
-const serieIdReplace = "stringToReplaceInSerieId";
-const serieInfosFind = /stringToFindInInfos/; // regex
-const serieInfosReplace = "stringToReplaceInInfos";
+const serieIdFind = /IREE-Dylib/; // regex
+const serieIdReplace = "IREE-LLVM-CPU";
+const serieInfosFind = /IREE-Dylib/; // regex
+const serieInfosReplace = "IREE-LLVM-CPU";
 
 let k = Object.keys(global.projectsConfig);
 for (let ii = 0; ii < k.length; ii++) {
@@ -118,6 +118,13 @@ for (var ii = 0; ii < kProjects.length; ii++) {
         console.log(projectId, 'Benchmark.series converting "', serieId, '" into "', newSerieId, '"');
         global.projects[projectId].series.writeSync(newSerieId, serie);
         global.projects[projectId].series.deleteSync(serieId);
+
+        let comment = global.projects[projectId].comments.readSync(serieId);
+        if (comment !== undefined) {
+          global.projects[projectId].comments.writeSync(newSerieId, comment);
+          global.projects[projectId].comments.deleteSync(serieId);
+        }
+
         series[newSerieId] = series[serieId];
         delete series[serieId];
       }
