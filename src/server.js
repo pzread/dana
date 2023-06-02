@@ -599,6 +599,22 @@ function apiAddSerie(apiData, hdl, apiVersion) {
 }
 
 /**
+ * Add a list of series to a project.
+ * @param {object} apiData, object containing a list of series.
+ * @param {function} hdl handler called at the end of the function.
+ * @return {void}.
+ */
+function apiAddSeries(apiData, hdl, apiVersion) {
+  for (let serieData of apiData.series) {
+    let err = apiAddSerie(serieData, (err) => err, apiVersion);
+    if (err) {
+      return hdl(err);
+    }
+  }
+  return hdl();
+}
+
+/**
  * Add a sample to a project and serie.
  * @param {object} apiData, object containing the sample.
  * @param {function} hdl handler called at the end of the function.
@@ -992,6 +1008,22 @@ function apiAddSample(apiData, hdl, apiVersion) {
   gs.projects[projectId].numSamples++;
   global.admin.writeSync('globalStats', gs);
 
+  return hdl();
+}
+
+/**
+ * Add a list of samples to a project.
+ * @param {object} apiData, object containing a list of samples.
+ * @param {function} hdl handler called at the end of the function.
+ * @return {void}.
+ */
+function apiAddSamples(apiData, hdl, apiVersion) {
+  for (let sampleData of apiData.samples) {
+    let err = apiAddSample(sampleData, (err) => err, apiVersion);
+    if (err) {
+      return hdl(err);
+    }
+  }
   return hdl();
 }
 
@@ -1692,6 +1724,16 @@ app.post('/apis/:apiVersion(v\\d+)?/:apiAction', function(req, res, next) {
     }, apiVersion);
     return;
   }
+  if (apiName === 'addSeries') {
+    apiAddSeries(data, function end(err) {
+      if (err) {
+        err.status = 400;
+        return res.send(err);
+      }
+      return res.send('addSeries successfull\n');
+    }, apiVersion);
+    return;
+  }
   if (apiName === 'addSample') {
     apiAddSample(data, function end(err) {
       if (err) {
@@ -1699,6 +1741,16 @@ app.post('/apis/:apiVersion(v\\d+)?/:apiAction', function(req, res, next) {
         return res.send(err);
       }
       return res.send('addSample successfull\n');
+    }, apiVersion);
+    return;
+  }
+  if (apiName === 'addSamples') {
+    apiAddSamples(data, function end(err) {
+      if (err) {
+        err.status = 400;
+        return res.send(err);
+      }
+      return res.send('addSamples successfull\n');
     }, apiVersion);
     return;
   }
